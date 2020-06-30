@@ -111,8 +111,9 @@ class MessageEvent:
         guild = self.get_rsvoid_guild()
         for member in guild.members:
             if member.id == user:
-                if AWS.does_unique_id_exist(unique_id=user):
-                    roles = RSVoidWebsiteUtils.get_user_roles(url=AWS.get_field_from_table(unique_id=user, field='Profile')).split("\n")
+                profile = AWS.get_field_from_table(unique_id=user, field='Profile')
+                if profile:
+                    roles = RSVoidWebsiteUtils.get_user_roles(url=profile).split("\n")
                     for role in roles:
                         if role in RSVoidWebsiteUtils.ROLES:
                             role = discord.utils.get(guild.roles, id=RSVoidWebsiteUtils.ROLES[role])
@@ -158,8 +159,8 @@ class MessageEvent:
 
     async def get_rep_for_user(self, user):
         try:
-            if AWS.does_unique_id_exist(unique_id=user):
-                url = AWS.get_field_from_table(unique_id=user, field='Profile')
+            url = AWS.get_field_from_table(unique_id=user, field='Profile')
+            if url:
                 name = RSVoidWebsiteUtils.get_user_name_from_url(url=url)
                 fb_score = RSVoidWebsiteUtils.get_user_feedback_score(url=url)
                 fb_resp = RSVoidWebsiteUtils.get_recent_feedback(url=url)

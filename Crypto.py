@@ -24,7 +24,7 @@ class BinanceClient:
         return round(float(self.client.get_ticker(symbol=pair)['priceChange']), 2)
 
     def get_crypto_info(self):
-        Utils.log("Crypto info has been requested...")
+        Utils.log("Crypto information has been requested...")
         assets = ["BTCUSDT", "ETHUSDT", "LTCUSDT", "XRPUSDT"]
         info = f'```diff\n+ Price is up over 24hrs\n- Price is down over 24hrs```\n'
         for asset in assets:
@@ -35,6 +35,7 @@ class BinanceClient:
                 info += f'**{asset}**\n```diff\n- Price: ${current_price}\n- 24hr Change: ${price_change}\n- Percent Change: %{percent_change}```\n`'
             else:
                 info += f'**{asset}**\n```diff\n+ Price: ${current_price}\n+ 24hr Change: ${price_change}\n+ Percent Change: %{percent_change}```\n'
+        Utils.log('Returning crypto information')
         return info
 
     @staticmethod
