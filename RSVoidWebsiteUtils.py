@@ -68,6 +68,10 @@ def get_recent_feedback(url):
     source = r.text
     soup = bs.BeautifulSoup(source, 'lxml')
     all_feedback = soup.find_all("li", {"class": "ipsDataItem"})
+    return get_five_most_recent_feedback(all_feedback=all_feedback)
+
+
+def get_five_most_recent_feedback(all_feedback):
     feedback_return = ''
     i = 1
     for feedback in all_feedback:

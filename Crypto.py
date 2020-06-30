@@ -10,6 +10,7 @@ class BinanceClient:
     def __init__(self):
         Utils.log("Loading Binance client...")
         self.client = Client(api_key=API, api_secret=SECRET)
+        Utils.log("Successfully loaded Binance client...")
 
     def get_asset_price(self, pair):
         Utils.log(f'Grabbing price of {pair}')

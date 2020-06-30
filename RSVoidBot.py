@@ -8,7 +8,7 @@ client = discord.Client()
 
 @client.event
 async def on_ready():
-    Utils.log("Discord client is ready.")
+    Utils.log(f"Discord client is ready. Logged in as {client.user} -- {client.user.id}")
     await client.change_presence(activity=discord.Game(name='www.rsvoid.com/'), status=discord.Status.idle)
 
 

@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 import enum
 import RSVoidWebsiteUtils
 import Utils
-import AWS
+from AWS import DynamoDB
 from Crypto import BinanceClient
 
 RSVOID_GUILD = 710071315423297549
@@ -20,6 +20,7 @@ class MessageEvent:
         self.client = client
         self.message = None
         self.content = None
+        self.aws = DynamoDB()
         self.binance = BinanceClient()
 
     def run_message_events(self):
@@ -36,7 +37,7 @@ class MessageEvent:
 
     async def run_direct_channel_events(self):
         if self.is_command(Command.VERIFY):
-            if AWS.does_unique_id_exist(unique_id=self.message.author.id):
+            if self.aws.does_unique_id_exist(unique_id=self.message.author.id):
                 await self.message.channel.send("This Discord Profile is already linked to an account. Please speak to a moderator if you believe this is an error or you need to request a change.")
             else:
                 await self.send_token_to_user()
@@ -65,7 +66,7 @@ class MessageEvent:
         channel = self.message.channel
         user_id = self.message.author.id
         if user:
-            if AWS.does_profile_exist(profile=user):
+            if self.aws.does_profile_exist(profile=user):
                 await self.message.channel.send("This RSVoid Profile is already linked to an account. Please speak to a moderator if you believe this is an error or you need to request a change.")
             else:
                 Utils.log(f'Token requested for {user} by {user_id}')
@@ -77,7 +78,7 @@ class MessageEvent:
                 if resp == 200:
                     Utils.log("Token has successfully been posted to users profile.")
                     await channel.send(f'The token has successfully been sent to your profile.')
-                    AWS.create_new_link_in_table(unique_id=user_id, token=token, profile=user)
+                    self.aws.create_new_link_in_table(unique_id=user_id, token=token, profile=user)
                 else:
                     await channel.send(f'There was an error posting your token to your profile. Admins have been notified of the error.')
                     await self.client.get_channel(LOGGER_CHANNEL).send(f'<@{self.message.author.id}> encountered an error while requesting a DM for a token.\n{resp}')
@@ -89,13 +90,17 @@ class MessageEvent:
         try:
             if len(splits) > 1:
                 provided_token = splits[1]
-                Utils.log(f"Redemption requested for {provided_token} by {self.message.author.id}")
-                db_token = AWS.get_token_from_table(unique_id=self.message.author.id)
+                Utils.log(f"Redemption requested for {provided_token} by {self.message.author} - {self.message.author.id}")
+                db_token = self.aws.get_auth_token_from_table(unique_id=self.message.author.id)
                 if db_token and db_token.lower() == provided_token.lower():
-                    AWS.update_field_in_table(unique_id=self.message.author.id, field='Verified', value=True)
+                    self.aws.update_field_in_table(unique_id=self.message.author.id, field='Verified', value=True)
                     await self.add_role_to_user(user=self.message.author.id)
                     await self.message.channel.send('Verification has been successful.')
-                    await self.client.get_channel(LOGGER_CHANNEL).send(f'<@{self.message.author.id}> Has been verified as - {AWS.get_field_from_table(unique_id=self.message.author.id, field="Profile")}')
+                    await self.client.get_channel(LOGGER_CHANNEL).send(f'<@{self.message.author.id}> Has been verified as - {self.aws.get_field_from_table(unique_id=self.message.author.id, field="Profile")}')
+                elif not db_token:
+                    await self.message.channel.send('There is no token associated with this profile.')
+                else:
+                    await self.message.channel.send('This token does not match the token provided to the RSVoid profile.')
             else:
                 await self.message.channel.send('No token has been detected in your message. !redeem TOKEN')
         except Exception as e:
@@ -115,13 +120,14 @@ class MessageEvent:
         guild = self.get_rsvoid_guild()
         for member in guild.members:
             if member.id == user:
-                profile = AWS.get_field_from_table(unique_id=user, field='Profile')
+                profile = self.aws.get_field_from_table(unique_id=user, field='Profile')
                 if profile:
                     roles = RSVoidWebsiteUtils.get_user_roles(url=profile).split("\n")
                     for role in roles:
                         if role in RSVoidWebsiteUtils.ROLES:
                             role = discord.utils.get(guild.roles, id=RSVoidWebsiteUtils.ROLES[role])
                             await member.add_roles(role)
+                            Utils.log(f"Successfully added {role} to {self.message.author} - {self.message.author.id}")
                 else:
                     Utils.log(f'{user} is not in DynamoDB database.')
                 break
@@ -134,7 +140,7 @@ class MessageEvent:
             await self.get_roles_for_user(user=self.message.mentions[0].id)
 
     async def get_roles_for_user(self, user):
-        url = AWS.get_field_from_table(unique_id=user, field='Profile')
+        url = self.aws.get_field_from_table(unique_id=user, field='Profile')
         if url:
             await self.send_embed(title=f"{RSVoidWebsiteUtils.get_user_name_from_url(url=url)}'s Roles", message=f'```fix\n{RSVoidWebsiteUtils.get_user_roles(url=url)}```')
         else:
@@ -148,7 +154,7 @@ class MessageEvent:
             await self.get_profile_for_user(user=self.message.mentions[0].id)
 
     async def get_profile_for_user(self, user):
-        user = AWS.get_field_from_table(unique_id=user, field='Profile')
+        user = self.aws.get_field_from_table(unique_id=user, field='Profile')
         if user:
             await self.message.channel.send(user)
         else:
@@ -163,7 +169,7 @@ class MessageEvent:
 
     async def get_rep_for_user(self, user):
         try:
-            url = AWS.get_field_from_table(unique_id=user, field='Profile')
+            url = self.aws.get_field_from_table(unique_id=user, field='Profile')
             if url:
                 name = RSVoidWebsiteUtils.get_user_name_from_url(url=url)
                 fb_score = RSVoidWebsiteUtils.get_user_feedback_score(url=url)
