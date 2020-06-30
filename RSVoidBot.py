@@ -1,5 +1,6 @@
 import MessageEvents
 import discord
+import Utils
 
 TOKEN = ''
 client = discord.Client()
@@ -7,13 +8,13 @@ client = discord.Client()
 
 @client.event
 async def on_ready():
-    print("Client is ready...")
+    Utils.log("Client is ready...")
     await client.change_presence(activity=discord.Game(name='www.rsvoid.com/'), status=discord.Status.idle)
 
 
 @client.event
 async def on_member_join(member):
-    print(f'Sending message to new member - {member} - {member.id}')
+    Utils.log(f'Sending message to new member - {member} - {member.id}')
     message = f'**Welcome to the RSVoid Official Discord Server**\n\nTo be verified please send me a message using the command !verify with your RSVoid profile linked to it\n\n**Example:** !verify https://www.rsvoid.com/profile/201-malcolm/\n\nThis should process a request to send a token to your RSVoid forums account which you will then redeem in this same direct message.\n\n**Example:** !redeem TOKEN\n\nIf you encounter any issues with the bot please send <@216026953130573824> a direct message.'
     try:
         await member.send(message)

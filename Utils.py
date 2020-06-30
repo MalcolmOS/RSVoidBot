@@ -1,5 +1,15 @@
 import string
 import random
+import time
+from datetime import datetime
+
+
+def get_time_stamp():
+    return f'[{time.ctime(datetime.timestamp(datetime.now()))}]'
+
+
+def log(content):
+    print(f'{get_time_stamp()} {content}')
 
 
 def generate_user_token():

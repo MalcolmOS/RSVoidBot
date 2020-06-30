@@ -16,7 +16,7 @@ PREFIX = '!'
 class MessageEvent:
 
     def __init__(self, client):
-        print('Loading GuildMessageEvent class...')
+        Utils.log('Loading GuildMessageEvent class...')
         self.client = client
         self.message = None
         self.content = None
@@ -67,14 +67,14 @@ class MessageEvent:
             if AWS.does_profile_exist(profile=user):
                 await self.message.channel.send("This RSVoid Profile is already linked to an account. Please speak to a moderator if you believe this is an error or you need to request a change.")
             else:
-                print(f'Token requested for {user} by {user_id}')
+                Utils.log(f'Token requested for {user} by {user_id}')
                 await channel.send(f'Sending token...please wait a few minutes for it to appear.')
                 token = Utils.generate_user_token()
                 loop = asyncio.get_event_loop()
                 event = RSVoidWebsiteUtils.SendTokenEvent(user=user, token=token)
                 resp = await loop.run_in_executor(ThreadPoolExecutor(), event.run)
                 if resp == 200:
-                    print("Token has successfully been posted to users profile.")
+                    Utils.log("Token has successfully been posted to users profile.")
                     await channel.send(f'The token has successfully been sent to your profile.')
                     AWS.create_new_link_in_table(unique_id=user_id, token=token, profile=user)
                 else:
@@ -84,10 +84,10 @@ class MessageEvent:
             await channel.send('The user entered returned an invalid value')
 
     async def verify_user(self):
-        print("Redemption requested...")
         splits = self.content.split(' ')
         try:
             provided_token = splits[1]
+            Utils.log(f"Redemption requested for {provided_token} by {self.message.author.id}")
             db_token = AWS.get_field_from_table(unique_id=self.message.author.id, field='AuthToken')
             if db_token and db_token.lower() == provided_token.lower():
                 AWS.update_field_in_table(unique_id=self.message.author.id, field='Verified', value=True)
@@ -107,7 +107,7 @@ class MessageEvent:
             await self.add_role_to_user(user=self.message.mentions[0].id)
 
     async def add_role_to_user(self, user):
-        print(f"Attempting to update roles for {user}")
+        Utils.log(f"Attempting to update roles for {user}")
         guild = self.get_rsvoid_guild()
         for member in guild.members:
             if member.id == user:
@@ -118,7 +118,7 @@ class MessageEvent:
                             role = discord.utils.get(guild.roles, id=RSVoidWebsiteUtils.ROLES[role])
                             await member.add_roles(role)
                 else:
-                    print(f'{user} is not in DynamoDB database.')
+                    Utils.log(f'{user} is not in DynamoDB database.')
                 break
 
     async def get_roles(self):

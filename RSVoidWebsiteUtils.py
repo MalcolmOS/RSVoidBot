@@ -1,4 +1,5 @@
 import requests
+import Utils
 import Driver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -42,7 +43,7 @@ def get_user_id_from_url(url):
 
 
 def get_user_roles(url):
-    print(f'Grabbing user roles for {url}')
+    Utils.log(f'Grabbing user roles for {url}')
     r = requests.get(url)
     roles = ''
     source = r.text
@@ -54,7 +55,7 @@ def get_user_roles(url):
 
 
 def get_user_feedback_score(url):
-    print(f"Accessing {url} to get feedback score")
+    Utils.log(f"Accessing {url} to get feedback score")
     r = requests.get(f'{url}?tab=node_feedback_Feedback')
     source = r.text
     soup = bs.BeautifulSoup(source, 'lxml')
@@ -63,7 +64,7 @@ def get_user_feedback_score(url):
 
 
 def get_recent_feedback(url):
-    print(f"Accessing {url} to get recent feedback")
+    Utils.log(f"Accessing {url} to get recent feedback")
     r = requests.get(f'{url}?tab=node_feedback_Feedback')
     source = r.text
     soup = bs.BeautifulSoup(source, 'lxml')
@@ -82,7 +83,7 @@ def get_recent_feedback(url):
 
 
 def get_user_rep(url):
-    print(f"Accessing {url} to get rep")
+    Utils.log(f"Accessing {url} to get reputation")
     r = requests.get(url)
     source = r.text
     soup = bs.BeautifulSoup(source, 'lxml')
@@ -114,19 +115,19 @@ class SendTokenEvent:
 
 class LoginEvent:
     def __init__(self, driver):
-        print('Loading Login Event...')
+        Utils.log('Loading Login Event...')
         self.driver = driver
 
     def run(self):
         self.driver.get('https://www.rsvoid.com/login/')
-        print("Opening RSVoid")
+        Utils.log("Opening RSVoid")
         time.sleep(10)
 
         if Driver.element_exists_by_id(self.driver, 'auth') and Driver.element_exists_by_id(self.driver, 'password'):
             self.driver.find_element_by_id('auth').send_keys(BOT_LOGIN)
             self.driver.find_element_by_id('password').send_keys(BOT_PASSWORD)
             self.driver.find_element_by_id('password').send_keys(Keys.RETURN)
-            print("Logging into RSVoid")
+            Utils.log("Logging into RSVoid")
             time.sleep(10)
         else:
             raise Exception("Error logging into RSVoid - elements do not exist.")
@@ -134,7 +135,7 @@ class LoginEvent:
 
 class SendMessageEvent:
     def __init__(self, driver, token):
-        print('Loading Send Token Event...')
+        Utils.log('Loading Send Token Event...')
         self.driver = driver
         self.token = token
 

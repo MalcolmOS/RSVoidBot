@@ -32,8 +32,3 @@ def element_exists_by_class(driver, cls):
     except NoSuchElementException:
         return False
 
-
-def get_message_box_id(driver):
-    for i in range(0, 1000):
-        if driver.find_element_by_id(f'cke_{i}_contents').is_displayed():
-            return i
