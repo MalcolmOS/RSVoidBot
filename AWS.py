@@ -48,6 +48,17 @@ def does_profile_exist(profile):
     return False
 
 
+def get_token_from_table(unique_id):
+    table = get_rsvoid_table()
+    Utils.log(f'Grabbing AuthToken from table for {unique_id}')
+    resp = table.query(
+        KeyConditionExpression=Key('UniqueID').eq(unique_id),
+    )
+    for item in resp['Items']:
+        if 'AuthToken' in item:
+            return item['AuthToken']
+
+
 def get_field_from_table(unique_id, field):
     table = get_rsvoid_table()
     Utils.log(f'Grabbing {field} from table for {unique_id}')
@@ -79,8 +90,20 @@ def update_field_in_table(unique_id, field, value):
     )
 
 
+def update_field_in_table_new_user(table, unique_id, field, value):
+    update_expression = f'set {field} = :{field}'
+    update_expression_attributes = {f':{field}': value}
+    Utils.log(f'Setting {field} to {value} for {unique_id}')
+    table.update_item(
+        Key={'UniqueID': unique_id},
+        UpdateExpression=update_expression,
+        ExpressionAttributeValues=update_expression_attributes
+    )
+
+
 def create_new_link_in_table(unique_id, token, profile):
-    update_field_in_table(unique_id=unique_id, field="AuthToken", value=token)
-    update_field_in_table(unique_id=unique_id, field="Profile", value=profile)
-    update_field_in_table(unique_id=unique_id, field="Verified", value=False)
+    table = get_rsvoid_table()
+    update_field_in_table_new_user(table=table, unique_id=unique_id, field="AuthToken", value=token)
+    update_field_in_table_new_user(table=table, unique_id=unique_id, field="Profile", value=profile)
+    update_field_in_table_new_user(table=table, unique_id=unique_id, field="Verified", value=False)
 

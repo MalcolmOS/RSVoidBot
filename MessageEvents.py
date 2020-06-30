@@ -26,6 +26,7 @@ class MessageEvent:
         @self.client.event
         async def on_message(message):
             if not message.author.bot and message.content.startswith(PREFIX):
+                Utils.log(f"Command detected used by {message.author} - {message.author.id} - {message.content}")
                 self.message = message
                 self.content = self.message.content.lower()
                 if message.channel.type is discord.ChannelType.text:
@@ -86,14 +87,17 @@ class MessageEvent:
     async def verify_user(self):
         splits = self.content.split(' ')
         try:
-            provided_token = splits[1]
-            Utils.log(f"Redemption requested for {provided_token} by {self.message.author.id}")
-            db_token = AWS.get_field_from_table(unique_id=self.message.author.id, field='AuthToken')
-            if db_token and db_token.lower() == provided_token.lower():
-                AWS.update_field_in_table(unique_id=self.message.author.id, field='Verified', value=True)
-                await self.add_role_to_user(user=self.message.author.id)
-                await self.message.channel.send('Verification has been successful.')
-                await self.client.get_channel(LOGGER_CHANNEL).send(f'<@{self.message.author.id}> Has been verified as - {AWS.get_field_from_table(unique_id=self.message.author.id, field="Profile")}')
+            if len(splits) > 1:
+                provided_token = splits[1]
+                Utils.log(f"Redemption requested for {provided_token} by {self.message.author.id}")
+                db_token = AWS.get_token_from_table(unique_id=self.message.author.id)
+                if db_token and db_token.lower() == provided_token.lower():
+                    AWS.update_field_in_table(unique_id=self.message.author.id, field='Verified', value=True)
+                    await self.add_role_to_user(user=self.message.author.id)
+                    await self.message.channel.send('Verification has been successful.')
+                    await self.client.get_channel(LOGGER_CHANNEL).send(f'<@{self.message.author.id}> Has been verified as - {AWS.get_field_from_table(unique_id=self.message.author.id, field="Profile")}')
+            else:
+                await self.message.channel.send('No token has been detected in your message. !redeem TOKEN')
         except Exception as e:
             print(e)
             await self.message.channel.send('There was an error processing this request.')

@@ -14,7 +14,6 @@ RANKS = {'Admin': 'admin.gif', 'Head Staff': 'head-staff.gif', 'Staff': 'Staff.g
          '$50 Donor': '50donor.gif', '$25 Donor': '25donor.gif', '$15 Donor': '15donor.gif', 'Sponsor': 'Sponsor.gif', 'GFX Designer': 'GFX-Designer.png', 'Advanced Member': 'advanced.png',
          'OG Member': 'OG-Member',  'Member': 'member.png.c5',  'New Member': 'new-member.png'}
 
-#'Admin': 710076439969398817, 'Staff': 710903817327083530,
 ROLES = {'Scripter': 721149870680965122, '$250 Donor': 721149557609857085, '$150 Donor': 724310849929609227,
          '$100 Donor': 721149684986675291, '$50 Donor': 723966588394537031, '$25 Donor': 722586346069164162, '$15 Donor': 721149825785266197, 'Sponsor': 716736124562964570,
          'GFX Designer': 721149950045454337, 'Advanced Member': 721150009726205982, 'OG Member': 723722015755731045,  'Member': 721150054211256382,  'New Member': 721150090609295420}
@@ -49,7 +48,7 @@ def get_user_roles(url):
     source = r.text
     for role in RANKS.keys():
         if RANKS.get(role) in source:
-            print(f'Found {role}')
+            Utils.log(f'Found {role}')
             roles += f'{role}\n'
     return roles
 
