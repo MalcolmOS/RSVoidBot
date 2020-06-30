@@ -21,7 +21,7 @@ def get_rsvoid_table():
     dynamo = get_dynamo()
     return dynamo.Table('RSVoidProfiles')
 
-"""
+
 def does_unique_id_exist(unique_id):
     table = get_rsvoid_table()
     Utils.log(f'Checking table for verification for user: {unique_id}')
@@ -34,7 +34,7 @@ def does_unique_id_exist(unique_id):
             return item['Verified']
     Utils.log(f'User {unique_id} is not in the table.')
     return False
-"""
+
 
 def does_profile_exist(profile):
     resp = table_scan()
