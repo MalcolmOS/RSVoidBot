@@ -8,9 +8,9 @@ SECRET_KEY = ''
 
 class DynamoDB:
     def __init__(self):
-        Utils.log("Loading DynamoDb...")
+        Utils.log("Loading DynamoDB...")
         self.table = self.get_rsvoid_table()
-        Utils.log("Successfully loaded DynamoDb...")
+        Utils.log("Successfully loaded DynamoDB...")
 
     @staticmethod
     def get_dynamo():
@@ -70,6 +70,7 @@ class DynamoDB:
                 if field in item:
                     Utils.log(f'Returning {field} from table for {unique_id}')
                     return item[field]
+        Utils.log(f'{field} does not exist for user - {unique_id}')
 
     def table_scan(self):
         Utils.log("Scanning RSVoid table...")

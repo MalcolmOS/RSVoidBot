@@ -48,7 +48,6 @@ class MessageEvent:
         if self.is_command(Command.CRYPTO):
             await self.send_embed(title="Crypto", message=self.binance.get_crypto_info())
         elif self.is_command(Command.FARMATON):
-            #await self.message.channel.send("https://discord.gg/KPcGnyx")
             await self.message.channel.send("Crops")
         elif self.is_command(Command.GET_ROLES):
             await self.get_roles()
@@ -128,6 +127,7 @@ class MessageEvent:
                             role = discord.utils.get(guild.roles, id=RSVoidWebsiteUtils.ROLES[role])
                             await member.add_roles(role)
                             Utils.log(f"Successfully added {role} to {self.message.author} - {self.message.author.id}")
+                    break
                 else:
                     Utils.log(f'{user} is not in DynamoDB database.')
                 break
@@ -220,7 +220,6 @@ class Command(enum.Enum):
 
 class PublicChannelCommandDescription(enum.Enum):
     CRYPTO = 'Returns popular Crypto prices in current time'
-    #FARM = 'Returns the link to the farmaton bot manager'
     FARM = 'Crops'
     GET_ROLES = 'Returns the RSVoid profile displayed roles'
     HELP = 'Returns this help menu'
