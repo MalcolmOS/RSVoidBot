@@ -4,7 +4,7 @@ from selenium import webdriver
 
 
 def get_driver():
-    gecko_driver = r'C:\Users\Malcolm\OneDrive\Documents\geckodriver.exe'
+    gecko_driver = r'./geckodriver'
     options = Options()
     options.headless = True
     driver = webdriver.Firefox(options=options, executable_path=gecko_driver)
